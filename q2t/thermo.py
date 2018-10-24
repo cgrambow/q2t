@@ -80,9 +80,14 @@ atom_energies = {
     }
 }
 
+freq_scale_factors = {
+    'b3lyp/6-31g(2df,p)': 0.965,
+    'wb97x-d3/def2-tzvp': 0.975,
+}
 
-def get_thermo(optfreq_log, model_chemistry, energy_log=None,
-               mol=None, freq_scale_factor=1.0, bacs=None,
+
+def get_thermo(optfreq_log, optfreq_level, energy_level, energy_log=None,
+               mol=None, bacs=None,
                infer_symmetry=False, infer_chirality=False, unique_id='0', scr_dir='SCRATCH'):
 
     q = QChem(logfile=optfreq_log)
@@ -134,6 +139,7 @@ def get_thermo(optfreq_log, model_chemistry, energy_log=None,
         rotation = LinearRotor(inertia=(inertia, 'amu*angstrom^2'), symmetry=symmetry)
 
     # Vibrational mode
+    freq_scale_factor = freq_scale_factors.get(optfreq_level, 1.0)
     freqs = [f * freq_scale_factor for f in freqs]
     vibration = HarmonicOscillator(frequencies=(freqs, 'cm^-1'))
 
@@ -141,7 +147,7 @@ def get_thermo(optfreq_log, model_chemistry, energy_log=None,
     e0 *= constants.E_h * constants.Na
     zpe *= constants.E_h * constants.Na * freq_scale_factor
     for sym in symbols:
-        e0 -= atom_energies[model_chemistry][sym] * constants.E_h * constants.Na
+        e0 -= atom_energies[energy_level][sym] * constants.E_h * constants.Na
         e0 += (h0expt[sym] - h298corr[sym]) * 4184.0
 
     if bacs is not None:
