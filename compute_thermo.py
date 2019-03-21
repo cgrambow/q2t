@@ -58,7 +58,7 @@ def main():
         mol = geo_to_rmg_mol(geo)
         if identifier in exceptions or mol_check.isIsomorphic(mol):
             thermo[identifier] = get_thermo(optfreq_log, args.freq_level, args.model_chemistry, energy_log=energy_log,
-                                            mol=mol, bacs=bacs,
+                                            mol=mol, bacs=bacs, soc=args.soc,
                                             infer_symmetry=args.symmetry, infer_chirality=args.chirality,
                                             unique_id=str(i), scr_dir=scr_dir)
             geos[identifier] = geo
@@ -89,6 +89,7 @@ def parse_args():
     parser.add_argument('--energy_dir', help='Directory containing Molpro energy jobs (optional)')
     parser.add_argument('--model_chemistry', default='ccsd(t)-f12a/cc-pvdz-f12', help='Level of theory for energy')
     parser.add_argument('--freq_level', default='wb97x-d3/def2-tzvp', help='Level of theory for frequencies')
+    parser.add_argument('--soc', action='store_true', help='Use spin-orbit corrections')
     parser.add_argument('--exceptions_file', help='File containing molecule identifiers that override '
                                                   'match checking of true and parsed geometry')
     parser.add_argument('--bacs', help='.json file containing BACs in kcal/mol')

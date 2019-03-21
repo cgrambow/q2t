@@ -22,6 +22,12 @@ h298corr = {'H': 1.01,
             'N': 1.04,
             'O': 1.04}
 
+# Spin-orbit corrections for neutral atoms
+atom_socs = {'H': 0.0,
+             'C': 0.000135,
+             'N': 0.0,
+             'O': 0.000355}
+
 # Atomic reference energies at 0K in Hartree
 atom_energies = {
     'ccsd(t)-f12a/cc-pvdz-f12': {
@@ -87,7 +93,7 @@ freq_scale_factors = {
 
 
 def get_thermo(optfreq_log, optfreq_level, energy_level, energy_log=None,
-               mol=None, bacs=None,
+               mol=None, bacs=None, soc=False,
                infer_symmetry=False, infer_chirality=False, unique_id='0', scr_dir='SCRATCH'):
 
     q = QChem(logfile=optfreq_log)
@@ -147,7 +153,10 @@ def get_thermo(optfreq_log, optfreq_level, energy_level, energy_log=None,
     e0 *= constants.E_h * constants.Na
     zpe *= constants.E_h * constants.Na * freq_scale_factor
     for sym in symbols:
-        e0 -= atom_energies[energy_level][sym] * constants.E_h * constants.Na
+        if soc:
+            e0 -= (atom_energies[energy_level][sym] - atom_socs[sym]) * constants.E_h * constants.Na
+        else:
+            e0 -= atom_energies[energy_level][sym] * constants.E_h * constants.Na
         e0 += (h0expt[sym] - h298corr[sym]) * 4184.0
 
     if bacs is not None:
